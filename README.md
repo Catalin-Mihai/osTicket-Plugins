@@ -1,2 +1,2 @@
 # osTicket-Plugins
-Repository of Plugins for osTicket
+Google auth plugin
