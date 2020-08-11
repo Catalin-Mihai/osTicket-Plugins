@@ -32,11 +32,14 @@ class OpenIDAuthMSPluginConfig extends PluginConfig {
         'required'=>true,
         'configuration' => array('size'=>60, 'length'=>100),
       )),
-      /*'LOGIN_LOGO' => new TextboxField(array(
-        'label' => $__('URL to login logo - Not yet implemented'),
+      'LOGIN_LOGO' => new TextboxField(array(
+        'label' => $__('URL to login logo'),
+        'required' => true,
+        'hint' => 'URL for fetching the login icon. E.g., 
+            https://docs.microsoft.com/en-us/azure/active-directory/develop/media/active-directory-branding-guidelines/sign-in-with-microsoft-light.png',
         'configuration' => array('size'=>60, 'length'=>250),
         'value'=>'https://docs.microsoft.com/en-us/azure/active-directory/develop/media/active-directory-branding-guidelines/sign-in-with-microsoft-light.png'
-      )),*/
+      )),
       'AUTHORITY_URL' => new TextboxField(array(
         'label' => $__('Authority URL'),
         'required'=>true,
@@ -49,19 +52,7 @@ class OpenIDAuthMSPluginConfig extends PluginConfig {
         'hint' => $__('This will form the rest of the authorization URL. E.g., /oauth2/v2.0/authorize'),
         'configuration' => array('size'=>60, 'length'=>100),
       )),
-      'ACCESS_ENDPOINT' => new TextboxField(array(
-        'label' => $__('Access Token Endpoint'),
-        'required'=>true,
-        'hint' => $__('This will form the rest of the access URL. E.g., /oauth2/v2.0/token'),
-        'configuration' => array('size'=>60, 'length'=>100),
-      )),
-      'RESOURCES_URL' => new TextboxField(array(
-        'label' => $__('Resources URL'),
-        'required'=>true,
-        'hint' => $__('This will query the user data. E.g., https://graph.microsoft.com/v1.0/me'),
-        'configuration' => array('size'=>60, 'length'=>100),
-      )),
-      /*'TOKEN_ENDPOINT' => new TextboxField(array(
+      'TOKEN_ENDPOINT' => new TextboxField(array(
         'label' => $__('Token Endpoint'),
         'required'=>true,
         'hint' => $__('This will form the rest of the token URL. E.g., /oauth2/v2.0/token'),
@@ -78,7 +69,7 @@ class OpenIDAuthMSPluginConfig extends PluginConfig {
         'required'=>true,
         'hint' => $__('This will form the rest of the URL for the service holding the user data.. E.g., /v1.0/me'),
         'configuration' => array('size'=>60, 'length'=>100),
-      )),*/
+      )),
       'SCOPES' => new TextboxField(array(
         'label' => $__('Scopes'),
         'required'=>true,

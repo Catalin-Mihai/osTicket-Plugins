@@ -2,12 +2,9 @@
 
 include_once 'curl_util.php';
 
-define('DEBUGGING', TRUE);
-
 class MicrosoftProviderAuth {
 
   var $config;
-  var $access_token;
   var $login_type;
 
   function __construct($config, $login_type) {
@@ -17,7 +14,6 @@ class MicrosoftProviderAuth {
 
     function triggerAuth() {
     global $ost;
-    $self = $this;
 
     $redirectUri = rawurlencode(rtrim($ost->getConfig()->getURL(), '/') . '/api/auth/ext');
     $redirectUriNonEncoded = rtrim($ost->getConfig()->getURL(), '/') . '/api/auth/ext';
@@ -32,19 +28,7 @@ class MicrosoftProviderAuth {
       exit;
     } else {
 
-        //INFORMATII DUPA AUTENTIFICARE
-        //NU CONTIN INFORMATII AMANUNTITE ( CUM SUNT CELE PRIMITE DIN MICROSOFT GRAPH DE MAI JOS)
-
         //TDOD - Implement real JWT validation
-
-        /*
-        $_SESSION[':id_token'] = $_REQUEST['id_token'];
-        $_SESSION[':code'] = $_REQUEST['code'];
-        $_SESSION[':jwt1'] = json_decode(base64_decode($jwt[0]), true);
-        $_SESSION[':jwt2'] = json_decode(base64_decode($jwt[1]), true);
-        $_SESSION[':jwt3'] = json_decode(base64_decode($jwt[2]), true);
-        */
-
 
         $jwt = explode('.', $_REQUEST['id_token']);
         $authInfo = json_decode(base64_decode($jwt[1]), true);
@@ -59,8 +43,7 @@ class MicrosoftProviderAuth {
         }
         $_SESSION[':openid-ms']['nonce'] = $authInfo['nonce'];
 
-        //Login type
-        //Redirectare
+        //Redirectare dupa login
         //POSIBILA PROBLEMA DIN CAUZA INVALIDARII RAPIDE A COOKIE-URILOR
 
         //if ($_COOKIE['LOGIN_TYPE'] === 'CLIENT') header('Location: /login.php');
@@ -76,17 +59,17 @@ class MicrosoftProviderAuth {
         //$_SESSION[':redirectUri'] = $redirectUri;
         //$_SESSION[':redirectUri2'] = rtrim($ost->getConfig()->getURL(), '/') . '/api/auth/ext';
         $post_fields = array(
-                'grant_type' => 'authorization_code',
-                'code' => $_REQUEST['code'], // codul primit din pasul de autorizare de mai devreme
-                'client_secret' => $clientSecret,
-                'client_id' => $clientId,
-                'scope' => $this->config->get('SCOPES'),
-                'redirect_uri' => $redirectUriNonEncoded
+            'grant_type' => 'authorization_code',
+            'code' => $_REQUEST['code'], // codul primit din pasul de autorizare de mai devreme
+            'client_secret' => $clientSecret,
+            'client_id' => $clientId,
+            'scope' => $this->config->get('SCOPES'),
+            'redirect_uri' => $redirectUriNonEncoded
         );
 
         // Url access token
         $url = $this->config->get('AUTHORITY_URL')
-          . $this->config->get('ACCESS_ENDPOINT');
+          . $this->config->get('TOKEN_ENDPOINT');
 
         // Curl post pentru obtinerea unui access_token
         $result = curl_post($url, $post_fields);
@@ -111,10 +94,10 @@ class MicrosoftProviderAuth {
         //$_SESSION[':graphHeaders'] = $headers;
 
         // Curl get pentru obtinerea profilului
-        $result = curl_get($this->config->get('RESOURCES_URL'), $headers);
+        $result = curl_get($resourceUrl, $headers);
 
         // Salvare informatii user
-        $_SESSION[':profile'] = $result;
+        $_SESSION[':profile'] = json_decode($result);
 
         if($this->login_type == 'CLIENT') {
             Http::redirect(ROOT_PATH . 'profile.php');
@@ -131,11 +114,14 @@ class MicrosoftOpenIDClientAuthBackend extends ExternalUserAuthenticationBackend
   static $id = "openid_ms.client";
   static $name = "Micrsoft OpenID Auth - Client";
 
-  static $sign_in_image_url = "https://docs.microsoft.com/en-us/azure/active-directory/develop/media/active-directory-branding-guidelines/sign-in-with-microsoft-light.png";
+  static $sign_in_image_url;
   static $service_name = "Microsoft OpenID Auth - Client";
 
 function __construct($config) {
   $this->config = $config;
+
+  self::$sign_in_image_url = $this->config->get('LOGIN_LOGO');
+
   if ($_SERVER['SCRIPT_NAME'] === '/login.php' || $_SERVER['SCRIPT_NAME'] === '/open.php') {
     setcookie('LOGIN_TYPE','CLIENT', time() + 180, "/");
     if ($this->config->get('HIDE_LOCAL_CLIENT_LOGIN')) {
@@ -179,7 +165,6 @@ function __construct($config) {
 
     function signOn() {
       global $errors;
-      $self = $this;
 
       if (isset($_SESSION[':openid-ms']['email'])) {
         // Check email for access
@@ -219,7 +204,7 @@ class MicrosoftOpenIDStaffAuthBackend extends ExternalStaffAuthenticationBackend
 
   function __construct($config) {
     $this->config = $config;
-    $sign_in_image_url = $this->config->get('LOGIN_LOGO');
+    self::$sign_in_image_url = $this->config->get('LOGIN_LOGO');
     if ($_SERVER['SCRIPT_NAME'] === '/scp/login.php') {
       setcookie('LOGIN_TYPE','STAFF', time() + 180, "/");
       if ($this->config->get('HIDE_LOCAL_STAFF_LOGIN')) {
