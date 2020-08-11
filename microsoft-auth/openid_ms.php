@@ -97,7 +97,7 @@ class MicrosoftProviderAuth {
         $result = curl_get($resourceUrl, $headers);
 
         // Salvare informatii user
-        $_SESSION[':profile'] = json_decode($result);
+        $_SESSION[':profile'] = json_decode($result, true);
 
         if($this->login_type == 'CLIENT') {
             Http::redirect(ROOT_PATH . 'profile.php');
