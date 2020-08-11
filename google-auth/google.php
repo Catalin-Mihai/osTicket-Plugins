@@ -74,9 +74,19 @@ class GoogleStaffAuthBackend extends ExternalStaffAuthenticationBackend {
                 . $this->google->access_token)
             ->then(function($response) {
                 require_once INCLUDE_DIR . 'class.json.php';
-                if ($json = JsonDataParser::decode($response->text))
-                    $_SESSION[':oauth']['email'] = $json['email'];
-                Http::redirect(ROOT_PATH . 'scp');
+                if (!($json = JsonDataParser::decode($response->text)))
+                    return;
+                $_SESSION[':oauth']['email'] = $json['email'];
+                $google->GET(
+                    "https://www.googleapis.com/plus/v1/people/me?access_token="
+                    . $this->google->access_token)
+                    ->then(function($response) {
+                        if (!($json = JsonDataParser::decode($response->text)))
+                            return;
+                        $_SESSION[':oauth']['profile'] = $json;
+                        Http::redirect(ROOT_PATH . 'scp');
+                    }
+                );
             }
         );
     }
