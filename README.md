@@ -1,2 +1,1 @@
-# osTicket-Plugins
-Repository of Plugins for osTicket
+# osticket-files-dev
